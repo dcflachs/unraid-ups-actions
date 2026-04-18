@@ -5,31 +5,31 @@ fi
 
 on_battery() {
   # Create directory or recreate directory if not exists
-  if [ ! -d /tmp/nut-actions ]; then
-    mkdir -p /tmp/nut-actions
+  if [ ! -d /tmp/ups-actions ]; then
+    mkdir -p /tmp/ups-actions
   else
-    rm -rf /tmp/nut-actions
+    rm -rf /tmp/ups-actions
     sleep 1
-    mkdir -p /tmp/nut-actions
+    mkdir -p /tmp/ups-actions
   fi
   # Create pid file
-  echo $$ > /var/run/nut-actions.pid
+  echo $$ > /var/run/ups-actions.pid
 
   # Read settings file
-  DELAY_SECONDS=$(cat /boot/config/plugins/nut-actions/settings.cfg 2>/dev/null | grep "DELAY" | cut -d '=' -f2 | sed 's/"//g')
+  DELAY_SECONDS=$(cat /boot/config/plugins/ups-actions/settings.cfg 2>/dev/null | grep "DELAY" | cut -d '=' -f2 | sed 's/"//g')
 
   # If delay is set wait for set delay
   if [ ! -z "${DELAY_SECONDS}" ]; then
     if [ "${DELAY_SECONDS}" != "0" ]; then
-      logger "nut-actions: waiting ${DELAY_SECONDS} seconds before continuing with 'on_battery' task..."
+      logger "ups-actions: waiting ${DELAY_SECONDS} seconds before continuing with 'on_battery' task..."
       sleep ${DELAY_SECONDS}s
     fi
   fi
 
   # Docker
   # Get running containers exluding exlude list
-  if [ -f /boot/config/plugins/nut-actions/docker_exclude.list ]; then
-    EXCLUDE_DOCKER=$(paste -sd '|' /boot/config/plugins/nut-actions/docker_exclude.list)
+  if [ -f /boot/config/plugins/ups-actions/docker_exclude.list ]; then
+    EXCLUDE_DOCKER=$(paste -sd '|' /boot/config/plugins/ups-actions/docker_exclude.list)
     RUNNING_DOCKER=$(docker ps --format "{{.Names}}" 2>/dev/null | grep -E -v "${EXCLUDE_DOCKER}")
   else
     RUNNING_DOCKER=$(docker ps --format "{{.Names}}" 2>/dev/null)
@@ -37,21 +37,21 @@ on_battery() {
 
   if [ ! -z "${RUNNING_DOCKER}" ]; then
     # Write running containers into temp file
-    echo "${RUNNING_DOCKER}" > /tmp/nut-actions/docker_running.list
+    echo "${RUNNING_DOCKER}" > /tmp/ups-actions/docker_running.list
 
     # Stop running containers
     if [ ! -z "${RUNNING_DOCKER}" ]; then
-      logger "nut-actions: Stopping Docker containers: $(echo "${RUNNING_DOCKER}" | tr '\n' ' ')"
+      logger "ups-actions: Stopping Docker containers: $(echo "${RUNNING_DOCKER}" | tr '\n' ' ')"
       docker stop -t 10 ${RUNNING_DOCKER} >/dev/null 2>&1
     fi
   else
-    rm -f /tmp/nut-actions/docker_running.list
+    rm -f /tmp/ups-actions/docker_running.list
   fi
 
   # LXC
   # Get running containers excluding exclude list
-  if [ -f /boot/config/plugins/nut-actions/lxc_exclude.list ]; then
-    EXCLUDE_LXC=$(paste -sd '|' /boot/config/plugins/nut-actions/lxc_exclude.list)
+  if [ -f /boot/config/plugins/ups-actions/lxc_exclude.list ]; then
+    EXCLUDE_LXC=$(paste -sd '|' /boot/config/plugins/ups-actions/lxc_exclude.list)
     RUNNING_LXC=$(lxc-ls --running -1 2>/dev/null | grep -E -v "${EXCLUDE_LXC}")
   else
     RUNNING_LXC=$(lxc-ls --running -1 2>/dev/null)
@@ -59,25 +59,25 @@ on_battery() {
 
   if [ ! -z "${RUNNING_LXC}" ]; then
     # Write running containers into temp file
-    echo "${RUNNING_LXC}" > /tmp/nut-actions/lxc_running.list
+    echo "${RUNNING_LXC}" > /tmp/ups-actions/lxc_running.list
 
     # Stop running containers
     if [ ! -z "${RUNNING_LXC}" ]; then
-      logger "nut-actions: Stopping LXC containers: $(echo "${RUNNING_LXC}" | tr '\n' ' ')"
+      logger "ups-actions: Stopping LXC containers: $(echo "${RUNNING_LXC}" | tr '\n' ' ')"
       IFS=$'\n'
       for container in ${RUNNING_LXC}
       do
         lxc-stop -t 10 $container  >/dev/null 2>&1
       done
     else
-      rm -f /tmp/nut-actions/lxc_running.list
+      rm -f /tmp/ups-actions/lxc_running.list
     fi
   fi
 
   # VM
   # Get running VMs exluding exlude list
-  if [ -f /boot/config/plugins/nut-actions/vm_exclude.list ]; then
-    EXCLUDE_VM=$(paste -sd '|' /boot/config/plugins/nut-actions/vm_exclude.list)
+  if [ -f /boot/config/plugins/ups-actions/vm_exclude.list ]; then
+    EXCLUDE_VM=$(paste -sd '|' /boot/config/plugins/ups-actions/vm_exclude.list)
     RUNNING_VM=$(virsh list --state-running | awk 'NR > 2 { $1=""; $NF=""; sub(/^ +| +$/, ""); print }' 2>/dev/null | grep -E -v "${EXCLUDE_VM}")
   else
     EXCLUD_VM=""
@@ -86,11 +86,11 @@ on_battery() {
 
   if [ ! -z "${RUNNING_VM}" ]; then
     # Write running containers into temp file
-    echo "${RUNNING_VM}" > /tmp/nut-actions/vm_running.list
+    echo "${RUNNING_VM}" > /tmp/ups-actions/vm_running.list
 
     # Stop running VMs
     if [ ! -z "${RUNNING_VM}" ]; then
-      logger "nut-actions: Stopping VMs: $(echo "${RUNNING_VM}" | tr '\n' ' ')"
+      logger "ups-actions: Stopping VMs: $(echo "${RUNNING_VM}" | tr '\n' ' ')"
       IFS=$'\n'
       for vm in ${RUNNING_VM}
       do
@@ -103,7 +103,7 @@ on_battery() {
         STILL_RUNNING=$(virsh list --state-running | awk 'NR > 2 { $1=""; $NF=""; sub(/^ +| +$/, ""); print }' 2>/dev/null)
       fi
       if [ ! -z "${STILL_RUNNING}" ]; then
-        logger "nut-actions: VMs still runnning! Destroying VMs: $(echo "${STILL_RUNNING}" | tr '\n' ' ')"
+        logger "ups-actions: VMs still runnning! Destroying VMs: $(echo "${STILL_RUNNING}" | tr '\n' ' ')"
         IFS=$'\n'
         for vm in ${STILL_RUNNING}
         do
@@ -112,36 +112,36 @@ on_battery() {
       fi
     fi
   else
-    rm -f /tmp/nut-actions/vm_running.list
+    rm -f /tmp/ups-actions/vm_running.list
   fi
-  logger "nut-actions: spinning down all disks"
+  logger "ups-actions: spinning down all disks"
   # Spin down all disks
   /usr/local/sbin/emcmd "cmdSpindownAll=Apply"
-  rm -f /var/run/nut-actions.pid
+  rm -f /var/run/ups-actions.pid
 }
 
 on_line() {
-  if [ ! -d /tmp/nut-actions ]; then
-    # Exit script when /tmp/nut-actions is not found because
+  if [ ! -d /tmp/ups-actions ]; then
+    # Exit script when /tmp/ups-actions is not found because
     # this is probably a normal boot
     exit 0
   fi
-  if [ -f /var/run/nut-actions.pid ]; then
-    logger "nut-actions: 'on_battery' task still running, killing task and running 'on_line' task"
-    OLD_PID=$(cat /var/run/nut-actions.pid)
+  if [ -f /var/run/ups-actions.pid ]; then
+    logger "ups-actions: 'on_battery' task still running, killing task and running 'on_line' task"
+    OLD_PID=$(cat /var/run/ups-actions.pid)
     kill -SIGTERM ${OLD_PID}
   fi
   # Create pid file
-  echo $$ > /var/run/nut-actions.pid
+  echo $$ > /var/run/ups-actions.pid
 
   # Docker
   # Check if there where any previously running containers
-  if [ -f /tmp/nut-actions/docker_running.list ]; then
+  if [ -f /tmp/ups-actions/docker_running.list ]; then
     # Get previously running containers
-    DOCKER_CONTAINERS=$(cat /tmp/nut-actions/docker_running.list)
+    DOCKER_CONTAINERS=$(cat /tmp/ups-actions/docker_running.list)
     # Sort containers after unraid autostart file
     DOCKER_CONTAINERS=$(awk 'NR==FNR { order[$1] = NR; next } $1 in order { print $1, order[$1] }' /var/lib/docker/unraid-autostart <(echo "${DOCKER_CONTAINERS}" | tr ' ' '\n') | sort -k2,2n | cut -d' ' -f1)
-    logger "nut-actions: Starting Docker containers: $(echo "${DOCKER_CONTAINERS}" | tr '\n' ' ')"
+    logger "ups-actions: Starting Docker containers: $(echo "${DOCKER_CONTAINERS}" | tr '\n' ' ')"
     # Start containers
     IFS=$'\n'
     for container in ${DOCKER_CONTAINERS}
@@ -152,9 +152,9 @@ on_line() {
 
   # LXC
   # Check if there where any previously running containers and start them
-  if [ -f /tmp/nut-actions/lxc_running.list ]; then
-    LXC_CONTAINERS=$(cat /tmp/nut-actions/lxc_running.list)
-    logger "nut-actions: Starting LXC containers: $(echo "${LXC_CONTAINERS}" | tr '\n' ' ')"
+  if [ -f /tmp/ups-actions/lxc_running.list ]; then
+    LXC_CONTAINERS=$(cat /tmp/ups-actions/lxc_running.list)
+    logger "ups-actions: Starting LXC containers: $(echo "${LXC_CONTAINERS}" | tr '\n' ' ')"
     # Start containers
     IFS=$'\n'
     for container in ${LXC_CONTAINERS}
@@ -165,21 +165,21 @@ on_line() {
 
   # VM
   # Check if there where any previously running VMs and start them
-  if [ -f /tmp/nut-actions/vm_running.list ]; then
-    VMS=$(cat /tmp/nut-actions/vm_running.list)
-    logger "nut-actions: Starting VMs: $(echo "${VMS}" | tr '\n' ' ')"
+  if [ -f /tmp/ups-actions/vm_running.list ]; then
+    VMS=$(cat /tmp/ups-actions/vm_running.list)
+    logger "ups-actions: Starting VMs: $(echo "${VMS}" | tr '\n' ' ')"
     # Start containers
     IFS=$'\n'
     for vm in ${VMS}
     do
       virsh start $(echo $vm | sed 's/ $//') >/dev/null 2>&1
     done
-    rm -f /tmp/nut-actions/vm_running.list
+    rm -f /tmp/ups-actions/vm_running.list
   fi
-  if [ -d /tmp/nut-actions ]; then
-    rm -rf /tmp/nut-actions
+  if [ -d /tmp/ups-actions ]; then
+    rm -rf /tmp/ups-actions
   fi
-  rm -f /var/run/nut-actions.pid
+  rm -f /var/run/ups-actions.pid
 }
 
 if [ "${1}" == "on_battery" ]; then

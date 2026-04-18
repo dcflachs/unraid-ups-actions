@@ -1,10 +1,10 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
-  <!ENTITY name      "nut-actions">
-  <!ENTITY author    "ich777">
-  <!ENTITY version   "2025.02.25">
-  <!ENTITY md5       "8962ce4903db6efaa035921629750398">
-  <!ENTITY launch    "Settings/nut-actions">
+  <!ENTITY name      "ups-actions">
+  <!ENTITY author    "dcflachs">
+  <!ENTITY version   "">
+  <!ENTITY md5       "">
+  <!ENTITY launch    "Settings/ups-actions">
   <!ENTITY gitURL    "https://github.com/&author;/unraid-&name;/raw/master">
   <!ENTITY pluginURL "&gitURL;/&name;.plg">
   <!ENTITY plugin    "/boot/config/plugins/&name;">
@@ -15,14 +15,8 @@
 
 <CHANGES>
 
-###2025.02.25
-- Add configurable delay in seconds for on-battery task (defaults to 0), configruable in the file: &plugin;/settings.cfg
-
-###2024.12.17
-- Spin down all disks when on battery
-
-###2024.12.15
-- Initial release
+###2026.04.18
+- Forked from nut-actions
 
 </CHANGES>
 
@@ -39,9 +33,9 @@ rm -f $(ls &plugin;/&name;*.txz 2>/dev/null|grep -v '&version;')
 
 <FILE Name="&emhttp;/README.md">
 <INLINE>
-**NUT Actions**
+**UPS Actions**
 
-This plugin is intended to seamlessly integrate with the NUT Plugin, automatically shutting down all your Docker and LXC Containers, as well as virtual machines (VMs), when your Server is operating on battery power to save energy to bridge power outages without shutting down your Server. You can specify exceptions to this behavior. Once power is restored, the plugin will automatically restart all previously running containers and VMs.
+This plugin is intended to seamlessly integrate with the NUT Plugin or builtin APC UPS plugin, automatically shutting down all your Docker and LXC Containers, as well as virtual machines (VMs), when your Server is operating on battery power to save energy to bridge power outages without shutting down your Server. You can specify exceptions to this behavior. Once power is restored, the plugin will automatically restart all previously running containers and VMs.
 </INLINE>
 </FILE>
 
@@ -73,7 +67,7 @@ if [ -f /etc/nut/xnut-notify-hooks.sh ]; then
 fi
 
 echo "---------------------------------------------------"
-echo "---Installation from NUT Actions Plugin complete---"
+echo "---Installation from UPS Actions Plugin complete---"
 echo "---------------------------------------------------"
 
 </INLINE>
@@ -83,7 +77,7 @@ echo "---------------------------------------------------"
 <INLINE>
 
 echo "-------------------------------------"
-echo "---Uninstalling NUT Actions Plugin---"
+echo "---Uninstalling UPS Actions Plugin---"
 echo "-------------------------------------"
 sed -i '/^ \{4\}if \[ -f \/usr\/bin\/nut-actions \]; then/{N;N;d;}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
 if [ -f /etc/nut/xnut-notify-hooks.sh ]; then
@@ -96,7 +90,7 @@ rm -rf &emhttp;
 rm -rf &plugin;
 echo
 echo "----------------------------------------------------------------"
-echo "---NUT Actions Plugin uninstalled, please reboot your server!---"
+echo "---UPS Actions Plugin uninstalled, please reboot your server!---"
 echo "----------------------------------------------------------------"
 echo
 
