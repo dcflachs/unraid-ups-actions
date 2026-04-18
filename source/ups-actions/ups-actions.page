@@ -1,6 +1,6 @@
 Menu="Utilities"
 Title="UPS Actions"
-Icon="nut-actions.png"
+Icon="plug-circle-exclamation"
 ---
 
 <script>
@@ -25,9 +25,9 @@ $excluded_docker = [];
 $excluded_lxc = [];
 $excluded_vm = [];
 
-$docker_exclude_file = "/boot/config/plugins/nut-actions/docker_exclude.list";
-$lxc_exclude_file = "/boot/config/plugins/nut-actions/lxc_exclude.list";
-$vm_exclude_file = "/boot/config/plugins/nut-actions/vm_exclude.list";
+$docker_exclude_file = "/boot/config/plugins/ups-actions/docker_exclude.list";
+$lxc_exclude_file = "/boot/config/plugins/ups-actions/lxc_exclude.list";
+$vm_exclude_file = "/boot/config/plugins/ups-actions/vm_exclude.list";
 
 if (file_exists($docker_exclude_file)) {
     $docker_list = file($docker_exclude_file, FILE_IGNORE_NEW_LINES);
@@ -212,40 +212,40 @@ if(isset($_POST['update'])) {
   if (!empty($_POST['docker_containers'])) {
     $dockerContainers = $_POST['docker_containers'];
     $docker_exclusion = implode("\n", $dockerContainers);
-    file_put_contents("/boot/config/plugins/nut-actions/docker_exclude.list", $docker_exclusion);
+    file_put_contents("/boot/config/plugins/ups-actions/docker_exclude.list", $docker_exclusion);
   } else {
-    if (file_exists("/boot/config/plugins/nut-actions/docker_exclude.list")) {
-      unlink("/boot/config/plugins/nut-actions/docker_exclude.list");
+    if (file_exists("/boot/config/plugins/ups-actions/docker_exclude.list")) {
+      unlink("/boot/config/plugins/ups-actions/docker_exclude.list");
     }
   }
   if (!empty($_POST['lxc_containers'])) {
     $lxcContainers = $_POST['lxc_containers'];
     $lxc_exclusion = implode("\n", $lxcContainers);
-    file_put_contents("/boot/config/plugins/nut-actions/lxc_exclude.list", $lxc_exclusion);
+    file_put_contents("/boot/config/plugins/ups-actions/lxc_exclude.list", $lxc_exclusion);
   } else {
-    if (file_exists("/boot/config/plugins/nut-actions/lxc_exclude.list")) {
-      unlink("/boot/config/plugins/nut-actions/lxc_exclude.list");
+    if (file_exists("/boot/config/plugins/ups-actions/lxc_exclude.list")) {
+      unlink("/boot/config/plugins/ups-actions/lxc_exclude.list");
     }
   }
   if (!empty($_POST['vm_s'])) {
     $virtual_machines = $_POST['vm_s'];
     $vm_exclusion .= implode("\n", $virtual_machines);
-    file_put_contents("/boot/config/plugins/nut-actions/vm_exclude.list", $vm_exclusion);
+    file_put_contents("/boot/config/plugins/ups-actions/vm_exclude.list", $vm_exclusion);
   } else {
-    if (file_exists("/boot/config/plugins/nut-actions/vm_exclude.list")) {
-      unlink("/boot/config/plugins/nut-actions/vm_exclude.list");
+    if (file_exists("/boot/config/plugins/ups-actions/vm_exclude.list")) {
+      unlink("/boot/config/plugins/ups-actions/vm_exclude.list");
     }
   }
   echo '<script>parent.window.location.reload();</script>';
 } elseif(isset($_POST['reset'])) {
-  if (file_exists("/boot/config/plugins/nut-actions/docker_exclude.list")) {
-    unlink("/boot/config/plugins/nut-actions/docker_exclude.list");
+  if (file_exists("/boot/config/plugins/ups-actions/docker_exclude.list")) {
+    unlink("/boot/config/plugins/ups-actions/docker_exclude.list");
   }
-  if (file_exists("/boot/config/plugins/nut-actions/lxc_exclude.list")) {
-    unlink("/boot/config/plugins/nut-actions/lxc_exclude.list");
+  if (file_exists("/boot/config/plugins/ups-actions/lxc_exclude.list")) {
+    unlink("/boot/config/plugins/ups-actions/lxc_exclude.list");
   }
-  if (file_exists("/boot/config/plugins/nut-actions/vm_exclude.list")) {
-    unlink("/boot/config/plugins/nut-actions/vm_exclude.list");
+  if (file_exists("/boot/config/plugins/ups-actions/vm_exclude.list")) {
+    unlink("/boot/config/plugins/ups-actions/vm_exclude.list");
   }
   echo '<script>parent.window.location.reload();</script>';
 }
