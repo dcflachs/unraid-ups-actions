@@ -35,7 +35,7 @@ jobs:
         CONTAINER_RT: docker
       run: |
         chmod +x ./build_in_container.sh
-        chmod +x ./source/makepkg_unraid.sh
+        chmod +x ./source/makepkg-unraid.sh
         ./build_in_container.sh -u
    
     - name: Upload Artifact 
