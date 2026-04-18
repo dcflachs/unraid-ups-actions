@@ -22,7 +22,7 @@ jobs:
       
     - name: Get current date
       id: date
-      run: echo "BUILD_DATE=date::$(date +'%Y.%m.%d')" >> "$GITHUB_OUTPUT"
+      run: echo "BUILD_DATE=$(date +'%Y.%m.%d')" >> "$GITHUB_OUTPUT"
       
     - name: Build the in Docker
       env: 
@@ -37,10 +37,16 @@ jobs:
       id: version
       run: echo "VERSION=${{steps.date.outputs.BUILD_DATE}}${{github.event.inputs.version_letter}}" >> "$GITHUB_OUTPUT"
    
-    - name: Upload Artifact 
+    - name: Upload Package 
       uses: actions/upload-artifact@v7
       with:
-        path: ./archive/ups-actions-*
+        path: ./archive/ups-actions-*txz
+        archive: false
+
+    - name: Upload Hash
+      uses: actions/upload-artifact@v7
+      with:
+        path: ./archive/ups-actions-*md5
         archive: false
 
     - name: Set Release ENV Variables On Manual
