@@ -1,14 +1,17 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
-  <!ENTITY name      "ups-actions">
-  <!ENTITY author    "dcflachs">
-  <!ENTITY version   "">
-  <!ENTITY md5       "">
-  <!ENTITY launch    "Settings/ups-actions">
-  <!ENTITY gitURL    "https://github.com/&author;/unraid-&name;/raw/master">
-  <!ENTITY pluginURL "&gitURL;/&name;.plg">
-  <!ENTITY plugin    "/boot/config/plugins/&name;">
-  <!ENTITY emhttp    "/usr/local/emhttp/plugins/&name;">
+  <!ENTITY name         "ups-actions">
+  <!ENTITY author       "dcflachs">
+  <!ENTITY version      "">
+  <!ENTITY md5          "">
+  <!ENTITY packageNAME  "&name;-&version;">
+  <!ENTITY packageFILE  "&packageNAME;.txz">
+  <!ENTITY launch       "Settings/ups-actions">
+  <!ENTITY gitURL       "https://github.com/&author;/unraid-&name;">
+  <!ENTITY pluginURL    "&gitURL;/raw/master/&name;.plg">
+  <!ENTITY packageURL   "&gitURL;/releases/download/&version;/&packageFILE;">
+  <!ENTITY plugin       "/boot/config/plugins/&name;">
+  <!ENTITY emhttp       "/usr/local/emhttp/plugins/&name;">
 ]>
 
 <PLUGIN   name="&name;" 
@@ -33,8 +36,8 @@ rm -f $(ls &plugin;/&name;*.txz 2>/dev/null|grep -v '&version;')
 </INLINE>
 </FILE>
 
-<FILE Name="&plugin;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>&gitURL;/packages/&name;-&version;.txz</URL>
+<FILE Name="&plugin;/&packageFILE;" Run="upgradepkg --install-new">
+<URL>&packageURL;</URL>
 <MD5>&md5;</MD5>
 </FILE>
 
@@ -49,28 +52,25 @@ This plugin is intended to seamlessly integrate with the NUT Plugin or builtin A
 <FILE Run="/bin/bash">
 <INLINE>
 
-if [ ! -f /boot/config/plugins/nut-dw.plg ]; then
-  removepkg &name;-&version;
-  rm -rf &emhttp;
-  rm -rf &plugin;
-  echo "------------------------------------------------------------------------------------------"
-  echo "---ERROR: NUT Plugin not found! Please install the NUT Plugin from desertwitch aka Rysz---"
-  echo "------------------------------------------------------------------------------------------"
-  exit 1
-fi
-
 if [ ! -f &plugin;/settings.cfg ]; then
   echo "DELAY_SECONDS=0" &gt; &plugin;/settings.cfg
 fi
 
-grep -q '/usr/bin/nut-actions on_line' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh || sed -i -e '/^ONLINE /,/}/{/}/s/^/    if [ -f \/usr\/bin\/nut-actions ]; then\n      \/usr\/bin\/nut-actions on_line\n    fi\n/}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
-grep -q '/usr/bin/nut-actions on_battery' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh || sed -i -e '/^ONBATT /,/}/{/}/s/^/    if [ -f \/usr\/bin\/nut-actions ]; then\n      \/usr\/bin\/nut-actions on_battery\n    fi\n/}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
 
-if [ -f /etc/nut/xnut-notify-hooks.sh ]; then
-  if ! grep -q '/usr/bin/nut-actions on_line' /etc/nut/xnut-notify-hooks.sh ; then
-    cp /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh /etc/nut/xnut-notify-hooks.sh
-    chmod +x /etc/nut/xnut-notify-hooks.sh
+if [ ! -f /boot/config/plugins/nut-dw.plg ]; then
+  echo "---WARNING: NUT Plugin not found!---"
+else
+
+  grep -q '/usr/bin/ups-actions on_line' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh || sed -i -e '/^ONLINE /,/}/{/}/s/^/    if [ -f \/usr\/bin\/ups-actions ]; then\n      \/usr\/bin\/ups-actions on_line\n    fi\n/}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
+  grep -q '/usr/bin/ups-actions on_battery' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh || sed -i -e '/^ONBATT /,/}/{/}/s/^/    if [ -f \/usr\/bin\/ups-actions ]; then\n      \/usr\/bin\/ups-actions on_battery\n    fi\n/}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
+
+  if [ -f /etc/nut/xnut-notify-hooks.sh ]; then
+    if ! grep -q '/usr/bin/ups-actions on_line' /etc/nut/xnut-notify-hooks.sh ; then
+      cp /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh /etc/nut/xnut-notify-hooks.sh
+      chmod +x /etc/nut/xnut-notify-hooks.sh
+    fi
   fi
+
 fi
 
 echo "---------------------------------------------------"
@@ -86,13 +86,15 @@ echo "---------------------------------------------------"
 echo "-------------------------------------"
 echo "---Uninstalling UPS Actions Plugin---"
 echo "-------------------------------------"
-sed -i '/^ \{4\}if \[ -f \/usr\/bin\/nut-actions \]; then/{N;N;d;}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
-if [ -f /etc/nut/xnut-notify-hooks.sh ]; then
-  cp /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh /etc/nut/xnut-notify-hooks.sh
-  chmod +x /etc/nut/xnut-notify-hooks.sh
+if [ -f /boot/config/plugins/nut-dw.plg ]; then
+  sed -i '/^ \{4\}if \[ -f \/usr\/bin\/ups-actions \]; then/{N;N;d;}' /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh
+  if [ -f /etc/nut/xnut-notify-hooks.sh ]; then
+    cp /boot/config/plugins/nut-dw/ups/xnut-notify-hooks.sh /etc/nut/xnut-notify-hooks.sh
+    chmod +x /etc/nut/xnut-notify-hooks.sh
+  fi
 fi
 # Remove plugin related files
-removepkg &name;-&version;
+removepkg &packageNAME;
 rm -rf &emhttp;
 rm -rf &plugin;
 echo
