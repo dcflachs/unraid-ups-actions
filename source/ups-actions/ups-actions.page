@@ -1,6 +1,6 @@
 Menu="Utilities"
 Title="UPS Actions"
-Icon="plug-circle-exclamation"
+Icon="battery-empty"
 ---
 
 <script>

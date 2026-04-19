@@ -19,7 +19,7 @@
           version="&version;" 
           launch="&launch;" 
           pluginURL="&pluginURL;" 
-          icon="plug-circle-exclamation"
+          icon="battery-empty"
           min="6.12.14" 
           support="">
 
