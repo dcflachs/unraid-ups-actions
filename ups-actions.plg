@@ -73,6 +73,10 @@ else
 
 fi
 
+# Add shims to apcupsd scripts
+grep -q '/usr/bin/ups-actions on_line' /etc/apcupsd/offbattery || sed -i -e '/^HOSTNAME=`hostname`$/i\if [ -f \/usr\/bin\/ups-actions ]; then\n      \/usr\/bin\/ups-actions on_line\nfi\n' /etc/apcupsd/offbattery
+grep -q '/usr/bin/ups-actions on_battery' /etc/apcupsd/onbattery || sed -i -e '/^HOSTNAME=`hostname`$/i\if [ -f \/usr\/bin\/ups-actions ]; then\n      \/usr\/bin\/ups-actions on_battery\nfi\n' /etc/apcupsd/onbattery
+
 echo "---------------------------------------------------"
 echo "---Installation from UPS Actions Plugin complete---"
 echo "---------------------------------------------------"
@@ -93,6 +97,7 @@ if [ -f /boot/config/plugins/nut-dw.plg ]; then
     chmod +x /etc/nut/xnut-notify-hooks.sh
   fi
 fi
+
 # Remove plugin related files
 removepkg &packageNAME;
 rm -rf &emhttp;

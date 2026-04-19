@@ -21,3 +21,4 @@ rm -R $TMP_DIR/$VERSION/
 chmod 755 $OUTPUT_DIR/*
 
 echo "MD5: $(cat $OUTPUT_DIR/${PLUGIN_NAME}-$VERSION.txz.md5)"
+echo "MD5: $(echo $MD5 | head -n1 | awk '{print $1;}')" >> $OUTPUT_FOLDER/release_info
